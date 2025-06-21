@@ -30,7 +30,7 @@ class _CalculatorSelectorDashboardState
       "title": AppLocalizations.translate("lcCalculatorTitle"),
       "description": AppLocalizations.translate("lcCalculatorDescription"),
       "imageUrl": "assets/images/lc_calculator_image.jpg",
-      "buttonText": "Calculate LC",
+      "buttonText": AppLocalizations.translate("calculateLC"),
       "route": "/lc-broth-calculator",
       "iconName": "science",
       "color": AppTheme.secondaryLight,
@@ -156,7 +156,7 @@ class _CalculatorSelectorDashboardState
               SizedBox(width: 3.w),
               Expanded(
                 child: Text(
-                  'Precision Cultivation Tools',
+                  AppLocalizations.translate("precisionCultivationTools"),
                   style: AppTheme.lightTheme.textTheme.titleLarge?.copyWith(
                     color: AppTheme.lightTheme.primaryColor,
                     fontWeight: FontWeight.w600,
@@ -168,7 +168,7 @@ class _CalculatorSelectorDashboardState
           ),
           SizedBox(height: 1.h),
           Text(
-            'Choose your calculator below to get precise measurements for optimal mushroom cultivation results.',
+            AppLocalizations.translate("precisionCultivationToolsDescription"),
             style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
               color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
             ),
@@ -183,7 +183,7 @@ class _CalculatorSelectorDashboardState
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Select Calculator',
+          AppLocalizations.translate("selectCalculator"),
           style: AppTheme.lightTheme.textTheme.titleLarge?.copyWith(
             color: AppTheme.lightTheme.colorScheme.onSurface,
             fontWeight: FontWeight.w600,
@@ -224,7 +224,7 @@ class _CalculatorSelectorDashboardState
           size: 5.w,
         ),
         label: Text(
-          'View Calculation History',
+          AppLocalizations.translate("viewCalculationHistory"),
           style: AppTheme.lightTheme.textTheme.labelLarge?.copyWith(
             color: AppTheme.lightTheme.primaryColor,
           ),

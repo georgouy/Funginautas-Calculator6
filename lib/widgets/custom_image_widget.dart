@@ -22,29 +22,43 @@ class CustomImageWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CachedNetworkImage(
-      imageUrl: imageUrl ??
-          'https://images.unsplash.com/photo-1584824486509-112e4181ff6b?q=80&w=2940&auto=format&fit=crop',
-      width: width,
-      height: height,
-      fit: fit,
-
-      // Use caller-supplied widget if provided, else fallback asset.
-      errorWidget: (context, url, error) =>
-          errorWidget ??
-          Image.asset(
-            "assets/images/no-image.jpg",
-            fit: fit,
-            width: width,
-            height: height,
-          ),
-
-      placeholder: (context, url) => Container(
+    if (imageUrl != null && imageUrl!.startsWith("assets/")) {
+      return Image.asset(
+        imageUrl!,
         width: width,
         height: height,
-        color: Colors.grey[200],
-        child: const Center(child: CircularProgressIndicator()),
-      ),
-    );
+        fit: fit,
+        errorBuilder: (context, error, stackTrace) =>
+            errorWidget ??
+            Image.asset(
+              "assets/images/no-image.jpg",
+              fit: fit,
+              width: width,
+              height: height,
+            ),
+      );
+    } else {
+      return CachedNetworkImage(
+        imageUrl: imageUrl ??
+            'https://images.unsplash.com/photo-1584824486509-112e4181ff6b?q=80&w=2940&auto=format&fit=crop',
+        width: width,
+        height: height,
+        fit: fit,
+        errorWidget: (context, url, error) =>
+            errorWidget ??
+            Image.asset(
+              "assets/images/no-image.jpg",
+              fit: fit,
+              width: width,
+              height: height,
+            ),
+        placeholder: (context, url) => Container(
+          width: width,
+          height: height,
+          color: Colors.grey[200],
+          child: const Center(child: CircularProgressIndicator()),
+        ),
+      );
+    }
   }
 }

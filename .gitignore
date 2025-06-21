@@ -21,3 +21,9 @@ coverage/
 # Configuración de entorno
 .env
 *.lock
+
+# Archivos de respaldo personalizados
+*OLD.dart
+*OLD2.dart
+*OLD3.dart
+*OLD4.dart

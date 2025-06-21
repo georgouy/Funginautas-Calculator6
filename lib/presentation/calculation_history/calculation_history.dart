@@ -474,7 +474,7 @@ class _CalculationHistoryState extends State<CalculationHistory> {
         foregroundColor: AppTheme.lightTheme.appBarTheme.foregroundColor,
         elevation: AppTheme.lightTheme.appBarTheme.elevation,
         title: Text(
-          'Calculation History',
+          AppLocalizations.translate("calculationHistoryTitle"),
           style: AppTheme.lightTheme.appBarTheme.titleTextStyle,
         ),
         actions: [

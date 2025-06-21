@@ -26,7 +26,7 @@ class IngredientToggleWidget extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Ingredient Selection',
+              AppLocalizations.translate("ingredientSelection"),
               style: AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w600,
               ),
@@ -44,7 +44,7 @@ class IngredientToggleWidget extends StatelessWidget {
                 children: [
                   Expanded(
                     child: _buildIngredientOption(
-                      'Malt Extract',
+                      AppLocalizations.translate("maltExtract"),
                       'science',
                       selectedIngredient == 'Malt Extract',
                     ),
@@ -56,7 +56,7 @@ class IngredientToggleWidget extends StatelessWidget {
                   ),
                   Expanded(
                     child: _buildIngredientOption(
-                      'Honey',
+                      AppLocalizations.translate("honey"),
                       'local_florist',
                       selectedIngredient == 'Honey',
                     ),
@@ -67,8 +67,8 @@ class IngredientToggleWidget extends StatelessWidget {
             SizedBox(height: 1.h),
             Text(
               selectedIngredient == 'Honey'
-                  ? 'Natural honey provides excellent nutrition for liquid cultures'
-                  : 'Malt extract offers consistent nutrients for mushroom cultivation',
+                  ? AppLocalizations.translate("honeyDescription")
+                  : AppLocalizations.translate("maltExtractDescription"),
               style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(
                 color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
               ),
