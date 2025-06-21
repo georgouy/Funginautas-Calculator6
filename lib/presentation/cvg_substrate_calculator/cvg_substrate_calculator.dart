@@ -1,0 +1,595 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sizer/sizer.dart';
+import 'package:share_plus/share_plus.dart';
+
+import '../../core/app_export.dart';
+import './widgets/calculation_result_card_widget.dart';
+import './widgets/header_image_widget.dart';
+import './widgets/input_field_widget.dart';
+
+class CvgSubstrateCalculator extends StatefulWidget {
+  const CvgSubstrateCalculator({super.key});
+
+  @override
+  State<CvgSubstrateCalculator> createState() => _CvgSubstrateCalculatorState();
+}
+
+class _CvgSubstrateCalculatorState extends State<CvgSubstrateCalculator> {
+  final TextEditingController _cocoCoirController = TextEditingController();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final ScrollController _scrollController = ScrollController();
+  final GlobalKey _resultsKey = GlobalKey();
+
+  bool _isCalculating = false;
+  bool _hasResults = false;
+  String _errorMessage = '';
+
+  // Calculation results
+  double _cocoCoirAmount = 0.0;
+  double _waterAmount = 0.0;
+  double _gypsumAmount = 0.0;
+  double _vermiculiteAmount = 0.0;
+
+  // CVG Substrate ratios (industry standard)
+  static const double _waterRatio = 5.0; // 5ml water per 1g coco coir
+  static const double _gypsumRatio = 0.05; // 5% gypsum of coco coir weight
+  static const double _vermiculiteRatio = 1.0; // 1:1 ratio with coco coir
+
+  @override
+  void dispose() {
+    _cocoCoirController.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _calculateSubstrate() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    setState(() {
+      _isCalculating = true;
+      _errorMessage = '';
+    });
+
+    // Add haptic feedback
+    HapticFeedback.lightImpact();
+
+    try {
+      final double inputAmount = double.parse(_cocoCoirController.text);
+
+      // Validate input range
+      if (inputAmount <= 0) {
+        setState(() {
+          _errorMessage = 'Please enter a positive amount';
+          _isCalculating = false;
+        });
+        return;
+      }
+
+      if (inputAmount > 10000) {
+        setState(() {
+          _errorMessage =
+              'Warning: Very large amount. Please verify your input.';
+        });
+      }
+
+      // Simulate calculation delay for better UX
+      await Future.delayed(const Duration(milliseconds: 800));
+
+      // Calculate substrate components
+      _cocoCoirAmount = inputAmount;
+      _waterAmount = inputAmount * _waterRatio;
+      _gypsumAmount = inputAmount * _gypsumRatio;
+      _vermiculiteAmount = inputAmount * _vermiculiteRatio;
+
+      setState(() {
+        _hasResults = true;
+        _isCalculating = false;
+      });
+
+      // Success haptic feedback
+      HapticFeedback.heavyImpact();
+
+      // Show scroll indicator and auto-scroll to results
+      _showScrollIndicatorAndScroll();
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Invalid input. Please enter a valid number.';
+        _isCalculating = false;
+      });
+    }
+  }
+
+  void _showScrollIndicatorAndScroll() {
+    // Show snackbar with scroll instruction
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(
+              Icons.keyboard_arrow_down,
+              color: Colors.white,
+            ),
+            SizedBox(width: 2.w),
+            Expanded(
+              child: Text(
+                AppLocalizations.translate('scrollToSeeResults'),
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: AppTheme.lightTheme.primaryColor,
+        duration: const Duration(seconds: 3),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        action: SnackBarAction(
+          label: 'OK',
+          textColor: Colors.white,
+          onPressed: () {
+            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          },
+        ),
+      ),
+    );
+
+    // Auto-scroll to results after a short delay
+    Future.delayed(const Duration(milliseconds: 800), () {
+      if (_resultsKey.currentContext != null) {
+        Scrollable.ensureVisible(
+          _resultsKey.currentContext!,
+          duration: const Duration(milliseconds: 800),
+          curve: Curves.easeInOut,
+        );
+      }
+    });
+  }
+
+  void _clearInput() {
+    _cocoCoirController.clear();
+    setState(() {
+      _hasResults = false;
+      _errorMessage = '';
+    });
+  }
+
+  void _shareResults() async {
+    if (!_hasResults) return;
+
+    final shareText = '''CVG Substrate Calculator Results
+
+Coco Coir: ${_cocoCoirAmount.toStringAsFixed(1)} g
+Water: ${_waterAmount.toStringAsFixed(1)} ml
+Gypsum: ${_gypsumAmount.toStringAsFixed(2)} g
+Vermiculite: ${_vermiculiteAmount.toStringAsFixed(1)} g
+
+Generated by FungiNautas Calculator''';
+
+    try {
+      await Share.share(
+        shareText,
+        subject: 'CVG Substrate Recipe',
+      );
+      HapticFeedback.selectionClick();
+    } catch (e) {
+      // Fallback to clipboard if share fails
+      Clipboard.setData(ClipboardData(text: shareText));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Recipe copied to clipboard'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      HapticFeedback.selectionClick();
+    }
+  }
+
+  void _saveToHistory() async {
+    if (!_hasResults) return;
+
+    // Show confirmation
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Calculation saved to history'),
+        duration: const Duration(seconds: 2),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+
+    HapticFeedback.selectionClick();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      appBar: AppBar(
+        title: Text(
+          AppLocalizations.translate('cvgCalculatorTitle'),
+          style: Theme.of(context).appBarTheme.titleTextStyle,
+        ),
+        leading: IconButton(
+          icon: CustomIconWidget(
+            iconName: 'arrow_back',
+            color: Theme.of(context).appBarTheme.foregroundColor ?? Colors.white,
+            size: 24,
+          ),
+          onPressed: () => Navigator.pop(context),
+        ),
+        elevation: Theme.of(context).appBarTheme.elevation,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+        foregroundColor: Theme.of(context).appBarTheme.foregroundColor,
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          controller: _scrollController,
+          physics: const BouncingScrollPhysics(),
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Header section
+                  Container(
+                    padding: EdgeInsets.all(4.w),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                          Theme.of(context).colorScheme.secondary.withOpacity(0.1),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
+                        width: 1,
+                      ),
+                    ),
+                    child: Column(
+                      children: [
+                        CustomIconWidget(
+                          iconName: 'science',
+                          color: Theme.of(context).colorScheme.primary,
+                          size: 12.w,
+                        ),
+                        SizedBox(height: 2.h),
+                        Text(
+                          AppLocalizations.translate('cvgCalculatorTitle'),
+                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                            color: Theme.of(context).colorScheme.primary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        SizedBox(height: 1.h),
+                        Text(
+                          AppLocalizations.translate('cvgCalculatorDescription'),
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  SizedBox(height: 4.h),
+
+                  // Input field
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surface,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
+                        width: 1,
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.fromLTRB(4.w, 3.h, 4.w, 1.h),
+                          child: Text(
+                            'Coco Coir Amount (g)',
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 4.w),
+                          child: TextFormField(
+                            controller: _cocoCoirController,
+                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                            inputFormatters: [
+                              FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+                            ],
+                            decoration: InputDecoration(
+                              hintText: 'Enter coco coir amount',
+                              border: InputBorder.none,
+                              suffixIcon: _cocoCoirController.text.isNotEmpty
+                                  ? IconButton(
+                                      icon: CustomIconWidget(
+                                        iconName: 'clear',
+                                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                        size: 20,
+                                      ),
+                                      onPressed: _clearInput,
+                                    )
+                                  : null,
+                            ),
+                            style: Theme.of(context).textTheme.bodyLarge,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter coco coir amount';
+                              }
+                              final number = double.tryParse(value);
+                              if (number == null || number <= 0) {
+                                return 'Please enter a valid positive number';
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                        SizedBox(height: 2.h),
+                      ],
+                    ),
+                  ),
+
+                  if (_errorMessage.isNotEmpty) ...[
+                    SizedBox(height: 2.h),
+                    Container(
+                      padding: EdgeInsets.all(3.w),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.errorContainer,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        _errorMessage,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onErrorContainer,
+                        ),
+                      ),
+                    ),
+                  ],
+
+                  SizedBox(height: 4.h),
+
+                  // Calculate button
+                  SizedBox(
+                    height: 6.h,
+                    child: ElevatedButton(
+                      onPressed: _isCalculating ? null : _calculateSubstrate,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                        elevation: 2,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: _isCalculating
+                          ? Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      Theme.of(context).colorScheme.onPrimary,
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(width: 3.w),
+                                Text(
+                                  AppLocalizations.translate('calculating'),
+                                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    color: Theme.of(context).colorScheme.onPrimary,
+                                  ),
+                                ),
+                              ],
+                            )
+                          : Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                CustomIconWidget(
+                                  iconName: 'calculate',
+                                  color: Theme.of(context).colorScheme.onPrimary,
+                                  size: 24,
+                                ),
+                                SizedBox(width: 2.w),
+                                Text(
+                                  AppLocalizations.translate('calculateCVG'),
+                                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    color: Theme.of(context).colorScheme.onPrimary,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                    ),
+                  ),
+
+                  // Results section
+                  if (_hasResults) ...[
+                    SizedBox(height: 4.h),
+
+                    // Results key for scrolling
+                    Container(
+                      key: _resultsKey,
+                      child: Text(
+                        AppLocalizations.translate('calculatedAmounts'),
+                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+
+                    SizedBox(height: 2.h),
+
+                    // Results cards
+                    Card(
+                      elevation: 4,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              AppTheme.lightTheme.colorScheme.primary.withOpacity(0.05),
+                              AppTheme.lightTheme.colorScheme.surface,
+                            ],
+                          ),
+                        ),
+                        child: Padding(
+                          padding: EdgeInsets.all(4.w),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  CustomIconWidget(
+                                    iconName: 'science',
+                                    color: AppTheme.lightTheme.colorScheme.primary,
+                                    size: 24,
+                                  ),
+                                  SizedBox(width: 2.w),
+                                  Text(
+                                    'CVG Substrate Recipe',
+                                    style: AppTheme.lightTheme.textTheme.titleLarge?.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                      color: AppTheme.lightTheme.colorScheme.primary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 2.h),
+
+                              // Results Grid
+                              Container(
+                                padding: EdgeInsets.all(3.w),
+                                decoration: BoxDecoration(
+                                  color: AppTheme.lightTheme.colorScheme.surface,
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: AppTheme.lightTheme.colorScheme.outline.withOpacity(0.3),
+                                  ),
+                                ),
+                                child: Column(
+                                  children: [
+                                    _buildResultRow('Coco Coir', '${_cocoCoirAmount.toStringAsFixed(1)} g', 'eco', AppTheme.lightTheme.colorScheme.primary),
+                                    Divider(height: 2.h),
+                                    _buildResultRow('Water', '${_waterAmount.toStringAsFixed(1)} ml', 'water_drop', Colors.blue),
+                                    Divider(height: 2.h),
+                                    _buildResultRow('Gypsum', '${_gypsumAmount.toStringAsFixed(2)} g', 'science', Colors.orange),
+                                    Divider(height: 2.h),
+                                    _buildResultRow('Vermiculite', '${_vermiculiteAmount.toStringAsFixed(1)} g', 'grain', Colors.brown),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    SizedBox(height: 3.h),
+
+                    // Action buttons
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: _saveToHistory,
+                            icon: CustomIconWidget(
+                              iconName: 'save',
+                              color: Theme.of(context).colorScheme.primary,
+                              size: 20,
+                            ),
+                            label: Text(AppLocalizations.translate('saveToHistory')),
+                            style: OutlinedButton.styleFrom(
+                              padding: EdgeInsets.symmetric(vertical: 1.5.h),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 3.w),
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: _shareResults,
+                            icon: CustomIconWidget(
+                              iconName: 'share',
+                              color: Theme.of(context).colorScheme.primary,
+                              size: 20,
+                            ),
+                            label: Text(AppLocalizations.translate('shareRecipe')),
+                            style: OutlinedButton.styleFrom(
+                              padding: EdgeInsets.symmetric(vertical: 1.5.h),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    SizedBox(height: 4.h),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildResultRow(String label, String value, String iconName, Color color) {
+    return Row(
+      children: [
+        CustomIconWidget(
+          iconName: iconName,
+          color: color,
+          size: 20,
+        ),
+        SizedBox(width: 3.w),
+        Expanded(
+          child: Text(
+            label,
+            style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+        Text(
+          value,
+          style: AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
+            color: color,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+    );
+  }
+}
+

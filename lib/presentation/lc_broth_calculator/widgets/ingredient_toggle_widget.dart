@@ -1,0 +1,119 @@
+import 'package:flutter/material.dart';
+import 'package:sizer/sizer.dart';
+
+import '../../../core/app_export.dart';
+
+class IngredientToggleWidget extends StatelessWidget {
+  final String selectedIngredient;
+  final Function(String) onIngredientChanged;
+
+  const IngredientToggleWidget({
+    super.key,
+    required this.selectedIngredient,
+    required this.onIngredientChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(4.w),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Ingredient Selection',
+              style: AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            SizedBox(height: 2.h),
+            Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: AppTheme.lightTheme.colorScheme.outline,
+                  width: 1,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: _buildIngredientOption(
+                      'Malt Extract',
+                      'science',
+                      selectedIngredient == 'Malt Extract',
+                    ),
+                  ),
+                  Container(
+                    width: 1,
+                    height: 6.h,
+                    color: AppTheme.lightTheme.colorScheme.outline,
+                  ),
+                  Expanded(
+                    child: _buildIngredientOption(
+                      'Honey',
+                      'local_florist',
+                      selectedIngredient == 'Honey',
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: 1.h),
+            Text(
+              selectedIngredient == 'Honey'
+                  ? 'Natural honey provides excellent nutrition for liquid cultures'
+                  : 'Malt extract offers consistent nutrients for mushroom cultivation',
+              style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(
+                color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildIngredientOption(
+      String ingredient, String iconName, bool isSelected) {
+    return GestureDetector(
+      onTap: () => onIngredientChanged(ingredient),
+      child: Container(
+        height: 6.h,
+        decoration: BoxDecoration(
+          color: isSelected
+              ? AppTheme.lightTheme.colorScheme.primary.withValues(alpha: 0.1)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(7),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CustomIconWidget(
+              iconName: iconName,
+              color: isSelected
+                  ? AppTheme.lightTheme.colorScheme.primary
+                  : AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+              size: 24,
+            ),
+            SizedBox(height: 0.5.h),
+            Text(
+              ingredient,
+              style: AppTheme.lightTheme.textTheme.labelMedium?.copyWith(
+                color: isSelected
+                    ? AppTheme.lightTheme.colorScheme.primary
+                    : AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

@@ -1,0 +1,44 @@
+# Aplicar normalización automática (usa LF en el repo, CRLF si es necesario en Windows)
+* text=auto
+
+# Archivos de texto con finales de línea LF
+*.dart       text eol=lf
+*.yaml       text eol=lf
+*.yml        text eol=lf
+*.json       text eol=lf
+*.md         text eol=lf
+*.sh         text eol=lf
+*.gradle     text eol=lf
+*.properties text eol=lf
+*.xml        text eol=lf
+*.plist      text eol=lf
+*.gitignore  text eol=lf
+*.gitattributes text eol=lf
+
+# Archivos de código web/común que también conviene normalizar
+*.html       text eol=lf
+*.css        text eol=lf
+*.js         text eol=lf
+*.ts         text eol=lf
+
+# Archivos binarios que deben quedar intactos (sin conversión de finales de línea)
+*.png        binary
+*.jpg        binary
+*.jpeg       binary
+*.gif        binary
+*.ico        binary
+*.svg        binary
+*.pdf        binary
+*.zip        binary
+*.jar        binary
+*.aar        binary
+*.ttf        binary
+*.otf        binary
+*.eot        binary
+*.woff       binary
+*.woff2      binary
+*.mp3        binary
+*.mp4        binary
+*.webm       binary
+*.apk        binary
+*.so         binary
