@@ -1,7 +1,7 @@
-# Aplicar normalización automática (usa LF en el repo, CRLF si es necesario en Windows)
-* text=auto
+# Forçar finais de linha LF em todos os arquivos de texto
+* text=auto eol=lf
 
-# Archivos de texto con finales de línea LF
+# Archivos de texto com finais de linha LF
 *.dart       text eol=lf
 *.yaml       text eol=lf
 *.yml        text eol=lf

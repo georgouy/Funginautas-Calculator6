@@ -35,6 +35,16 @@ class _CalculatorSelectorDashboardState
       "iconName": "science",
       "color": AppTheme.secondaryLight,
     },
+    {
+      "id": 3,
+      "title": AppLocalizations.translate("agarMediumCalculatorTitle"),
+      "description": AppLocalizations.translate("agarMediumCalculatorDescription"),
+      "imageUrl": "assets/images/agar_medium_calculator_image.jpg",
+      "buttonText": AppLocalizations.translate("calculateAgar"),
+      "route": "/agar-medium-calculator",
+      "iconName": "biotech",
+      "color": const Color(0xFF8E24AA),
+    },
   ];
 
   @override
