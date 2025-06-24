@@ -45,8 +45,9 @@ class IngredientToggleWidget extends StatelessWidget {
                   Expanded(
                     child: _buildIngredientOption(
                       AppLocalizations.translate("maltExtract"),
+                      AppLocalizations.translate("maltExtract"), // Usar a string traduzida como identificador
                       'science',
-                      selectedIngredient == 'Malt Extract',
+                      selectedIngredient == AppLocalizations.translate("maltExtract"),
                     ),
                   ),
                   Container(
@@ -57,8 +58,9 @@ class IngredientToggleWidget extends StatelessWidget {
                   Expanded(
                     child: _buildIngredientOption(
                       AppLocalizations.translate("honey"),
+                      AppLocalizations.translate("honey"), // Usar a string traduzida como identificador
                       'local_florist',
-                      selectedIngredient == 'Honey',
+                      selectedIngredient == AppLocalizations.translate("honey"),
                     ),
                   ),
                 ],
@@ -66,7 +68,7 @@ class IngredientToggleWidget extends StatelessWidget {
             ),
             SizedBox(height: 1.h),
             Text(
-              selectedIngredient == 'Honey'
+              selectedIngredient == AppLocalizations.translate("honey")
                   ? AppLocalizations.translate("honeyDescription")
                   : AppLocalizations.translate("maltExtractDescription"),
               style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(
@@ -80,14 +82,14 @@ class IngredientToggleWidget extends StatelessWidget {
   }
 
   Widget _buildIngredientOption(
-      String ingredient, String iconName, bool isSelected) {
+      String displayIngredient, String identifierIngredient, String iconName, bool isSelected) {
     return GestureDetector(
-      onTap: () => onIngredientChanged(ingredient),
+      onTap: () => onIngredientChanged(identifierIngredient),
       child: Container(
         height: 6.h,
         decoration: BoxDecoration(
           color: isSelected
-              ? AppTheme.lightTheme.colorScheme.primary.withValues(alpha: 0.1)
+              ? AppTheme.lightTheme.colorScheme.primary
               : Colors.transparent,
           borderRadius: BorderRadius.circular(7),
         ),
@@ -97,16 +99,16 @@ class IngredientToggleWidget extends StatelessWidget {
             CustomIconWidget(
               iconName: iconName,
               color: isSelected
-                  ? AppTheme.lightTheme.colorScheme.primary
+                  ? AppTheme.lightTheme.colorScheme.onPrimary
                   : AppTheme.lightTheme.colorScheme.onSurfaceVariant,
               size: 24,
             ),
             SizedBox(height: 0.5.h),
             Text(
-              ingredient,
+              displayIngredient,
               style: AppTheme.lightTheme.textTheme.labelMedium?.copyWith(
                 color: isSelected
-                    ? AppTheme.lightTheme.colorScheme.primary
+                    ? AppTheme.lightTheme.colorScheme.onPrimary
                     : AppTheme.lightTheme.colorScheme.onSurfaceVariant,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
               ),
@@ -117,3 +119,5 @@ class IngredientToggleWidget extends StatelessWidget {
     );
   }
 }
+
+

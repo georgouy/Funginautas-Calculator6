@@ -7,6 +7,7 @@ import '../presentation/settings/settings.dart';
 import '../presentation/cvg_substrate_calculator/cvg_substrate_calculator.dart';
 import '../presentation/error_resolution_guide/error_resolution_guide.dart';
 import '../presentation/support/support_page.dart';
+import '../presentation/agar_medium_calculator/agar_medium_calculator.dart';
 
 class AppRoutes {
   static const String initial = '/';
@@ -15,6 +16,7 @@ class AppRoutes {
       '/calculator-selector-dashboard';
   static const String cvgSubstrateCalculator = '/cvg-substrate-calculator';
   static const String lcBrothCalculator = '/lc-broth-calculator';
+  static const String agarMediumCalculator = '/agar-medium-calculator';
   static const String calculationHistory = '/calculation-history';
   static const String settings = '/settings';
   static const String errorResolutionGuide = '/error-resolution-guide';
@@ -27,10 +29,12 @@ class AppRoutes {
         const CalculatorSelectorDashboard(),
     cvgSubstrateCalculator: (context) => const CvgSubstrateCalculator(),
     lcBrothCalculator: (context) => const LcBrothCalculator(),
+    agarMediumCalculator: (context) => const AgarMediumCalculator(),
     calculationHistory: (context) => const CalculationHistory(),
     settings: (context) => const Settings(),
     errorResolutionGuide: (context) => const ErrorResolutionGuide(),
     support: (context) => const SupportPage(),
   };
 }
+
 

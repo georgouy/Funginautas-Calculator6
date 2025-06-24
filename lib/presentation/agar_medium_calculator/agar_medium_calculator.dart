@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import '../../core/localization.dart';
 import '../../widgets/custom_image_widget.dart';
 import 'widgets/medium_type_selector_widget.dart';
@@ -14,6 +15,8 @@ class AgarMediumCalculator extends StatefulWidget {
 class _AgarMediumCalculatorState extends State<AgarMediumCalculator> {
   final TextEditingController _volumeController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final ScrollController _scrollController = ScrollController();
+  final GlobalKey _resultsKey = GlobalKey();
   
   String _selectedMediumType = 'PDA'; // PDA ou MEA
   double? _calculatedVolume;
@@ -26,6 +29,7 @@ class _AgarMediumCalculatorState extends State<AgarMediumCalculator> {
   @override
   void dispose() {
     _volumeController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -105,6 +109,17 @@ class _AgarMediumCalculatorState extends State<AgarMediumCalculator> {
         _results = results;
         _isCalculating = false;
       });
+
+      // Auto-scroll to results after calculation
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        if (_resultsKey.currentContext != null) {
+          Scrollable.ensureVisible(
+            _resultsKey.currentContext!,
+            duration: const Duration(milliseconds: 500),
+            curve: Curves.easeInOut,
+          );
+        }
+      });
     });
   }
 
@@ -117,6 +132,7 @@ class _AgarMediumCalculatorState extends State<AgarMediumCalculator> {
         foregroundColor: Colors.white,
       ),
       body: SingleChildScrollView(
+        controller: _scrollController,
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
@@ -244,6 +260,7 @@ class _AgarMediumCalculatorState extends State<AgarMediumCalculator> {
               // Resultados
               if (_results.isNotEmpty)
                 AgarResultsWidget(
+                  key: _resultsKey,
                   results: _results,
                   mediumType: _selectedMediumType,
                   volume: _calculatedVolume!,
@@ -255,4 +272,5 @@ class _AgarMediumCalculatorState extends State<AgarMediumCalculator> {
     );
   }
 }
+
 
